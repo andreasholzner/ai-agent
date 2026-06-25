@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log Climb — Climbing Log</title>
+  <link rel="stylesheet" href="colors.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&family=Open+Sans:wght@400;500;600&display=swap');
 
     :root {
       --bg:         #0f1117;
@@ -26,7 +29,7 @@
       min-height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Roboto', 'Open Sans', system-ui, sans-serif;
       font-size: 15px;
       line-height: 1.5;
     }
@@ -255,15 +258,15 @@
 
   <header>
     <span class="logo">Climbing Log</span>
-    <nav><a href="#">All Ascents</a></nav>
+    <nav><a href="ascents.html">All Ascents</a></nav>
   </header>
 
   <main>
     <div class="card">
-      <h1 class="card-title">Log a Climb</h1>
-      <p class="card-sub">Record a new ascent to your logbook.</p>
+      <h1 class="card-title" id="page-title">Log a Climb</h1>
+      <p class="card-sub" id="page-subtitle">Record a new ascent to your logbook.</p>
 
-      <form>
+      <form id="climb-form">
 
         <!-- Route name -->
         <div class="field">
@@ -274,7 +277,7 @@
         <!-- Area -->
         <div class="field">
           <label for="area">Area</label>
-          <input id="area" type="text" placeholder="e.g. Yosemite Valley" autocomplete="off">
+          <input id="area" type="text" placeholder="e.g. Yosemite Valley" autocomplete="off" required>
         </div>
 
         <!-- Grade + Date -->
@@ -306,20 +309,12 @@
               <label for="s-trad">Trad</label>
             </span>
             <span class="chip">
-              <input type="radio" name="style" id="s-boulder" value="boulder">
-              <label for="s-boulder">Boulder</label>
-            </span>
-            <span class="chip">
               <input type="radio" name="style" id="s-toprope" value="top-rope">
               <label for="s-toprope">Top Rope</label>
             </span>
             <span class="chip">
-              <input type="radio" name="style" id="s-alpine" value="alpine">
-              <label for="s-alpine">Alpine</label>
-            </span>
-            <span class="chip">
-              <input type="radio" name="style" id="s-ice" value="ice">
-              <label for="s-ice">Ice</label>
+              <input type="radio" name="style" id="s-indoor" value="indoor">
+              <label for="s-indoor">Indoor</label>
             </span>
           </div>
         </div>
@@ -334,8 +329,8 @@
 
         <!-- Actions -->
         <div class="actions">
-          <button type="reset" class="btn btn-ghost">Clear</button>
-          <button type="submit" class="btn btn-primary">Save Ascent</button>
+          <button type="reset" class="btn btn-ghost" id="btn-reset">Clear</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit">Save Ascent</button>
         </div>
 
       </form>
@@ -345,5 +340,78 @@
   <footer>Climbing Log</footer>
 
 </div>
+
+<script src="app.js"></script>
+<script>
+  let editingId = null;
+
+  const form = document.getElementById('climb-form');
+  const pageTitle = document.getElementById('page-title');
+  const pageSubtitle = document.getElementById('page-subtitle');
+  const btnSubmit = document.getElementById('btn-submit');
+  const btnReset = document.getElementById('btn-reset');
+
+  function loadFormData(ascent) {
+    document.getElementById('route-name').value = ascent.name;
+    document.getElementById('area').value = ascent.area;
+    document.getElementById('grade').value = ascent.grade || '';
+    document.getElementById('date').value = ascent.date;
+    document.getElementById('notes').value = ascent.notes || '';
+    document.querySelector(`input[name="style"][value="${ascent.style}"]`).checked = true;
+  }
+
+  function initEditMode() {
+    const editId = getQueryParam('edit');
+    if (editId) {
+      const ascent = getAscent(editId);
+      if (ascent) {
+        editingId = editId;
+        pageTitle.textContent = 'Edit Ascent';
+        pageSubtitle.textContent = 'Update an existing ascent.';
+        btnSubmit.textContent = 'Update Ascent';
+        btnReset.textContent = 'Cancel';
+        loadFormData(ascent);
+      }
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const ascent = {
+      id: editingId,
+      name: document.getElementById('route-name').value.trim(),
+      area: document.getElementById('area').value.trim(),
+      grade: document.getElementById('grade').value.trim(),
+      date: document.getElementById('date').value,
+      style: document.querySelector('input[name="style"]:checked').value,
+      notes: document.getElementById('notes').value.trim(),
+    };
+
+    if (!ascent.name || !ascent.area || !ascent.date) {
+      alert('Please fill in all required fields (Route Name, Area, Date).');
+      return;
+    }
+
+    saveAscent(ascent);
+    window.location.href = 'ascents.html';
+  });
+
+  form.addEventListener('reset', (e) => {
+    if (editingId) {
+      e.preventDefault();
+      window.location.href = 'ascents.html';
+    }
+  });
+
+  // Set today's date as default
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('date');
+  if (!dateInput.value) {
+    dateInput.value = today;
+  }
+
+  initEditMode();
+</script>
 </body>
 </html>
