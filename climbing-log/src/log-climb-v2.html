@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Climb — Climbing Log (v2)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #060c18;
+      --surface:    #0c1526;
+      --border:     #1a2e52;
+      --border-focus: #1e8dff;
+      --blue:       #1e8dff;
+      --blue-dim:   #0a2e66;
+      --blue-hover: #55aeff;
+      --text:       #92bbff;
+      --text-muted: #4a6a99;
+      --input-bg:   #09112080;
+      --radius:     4px;
+      --gap:        1.5rem;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ──────────────────────────────── */
+    .shell {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(1rem, 4vw, 2.5rem);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      transition: color 0.15s;
+    }
+    nav a:hover { color: var(--text); }
+
+    main {
+      padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    /* ── Typography ──────────────────────────── */
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.25rem;
+      color: #cce0ff;
+    }
+
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: var(--gap);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: var(--gap) 0;
+    }
+
+    /* ── Form grid ───────────────────────────── */
+    form { display: flex; flex-direction: column; gap: var(--gap); }
+
+    .row {
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 420px) { .row { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input, select, textarea {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.6rem 0.75rem;
+      width: 100%;
+      outline: none;
+      border-radius: var(--radius);
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      background: var(--surface);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5) sepia(1) hue-rotate(180deg) brightness(1.2);
+      cursor: pointer;
+    }
+
+    /* Custom select arrow */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--text-muted);
+      border-bottom: none;
+    }
+    .select-wrap select { padding-right: 2.2rem; cursor: pointer; }
+    select option { background: #1a1f2e; }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    /* ── Style chips ─────────────────────────── */
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .chip {
+      position: relative;
+    }
+    .chip input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .chip label {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .chip input[type="radio"]:checked + label {
+      border-color: var(--blue);
+      color: var(--blue-hover);
+      background: var(--blue-dim);
+    }
+    .chip label:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* ── Grade hint ──────────────────────────── */
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── Actions ─────────────────────────────── */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--blue-hover); }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="logo">Climbing Log</span>
+    <nav><a href="#">All Ascents</a></nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1 class="card-title">Log a Climb</h1>
+      <p class="card-sub">Record a new ascent to your logbook.</p>
+
+      <form>
+
+        <!-- Route name -->
+        <div class="field">
+          <label for="route-name">Route Name</label>
+          <input id="route-name" type="text" placeholder="e.g. Salathe Wall" required autocomplete="off">
+        </div>
+
+        <!-- Area -->
+        <div class="field">
+          <label for="area">Area</label>
+          <input id="area" type="text" placeholder="e.g. Yosemite Valley" autocomplete="off">
+        </div>
+
+        <!-- Grade + Date -->
+        <div class="row">
+          <div class="field">
+            <label for="grade">Grade</label>
+            <input id="grade" type="text" placeholder="e.g. 7a, 5.12a, V5" autocomplete="off">
+            <span class="hint">French, YDS, Hueco — any system</span>
+          </div>
+
+          <div class="field">
+            <label for="date">Date</label>
+            <input id="date" type="date" required>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Climbing style -->
+        <div class="field">
+          <label>Climbing Style</label>
+          <div class="chips">
+            <span class="chip">
+              <input type="radio" name="style" id="s-sport" value="sport" checked>
+              <label for="s-sport">Sport</label>
+            </span>
+            <span class="chip">
+              <input type="radio" name="style" id="s-trad" value="trad">
+              <label for="s-trad">Trad</label>
+            </span>
+            <span class="chip">
+              <input type="radio" name="style" id="s-boulder" value="boulder">
+              <label for="s-boulder">Boulder</label>
+            </span>
+            <span class="chip">
+              <input type="radio" name="style" id="s-toprope" value="top-rope">
+              <label for="s-toprope">Top Rope</label>
+            </span>
+            <span class="chip">
+              <input type="radio" name="style" id="s-alpine" value="alpine">
+              <label for="s-alpine">Alpine</label>
+            </span>
+            <span class="chip">
+              <input type="radio" name="style" id="s-ice" value="ice">
+              <label for="s-ice">Ice</label>
+            </span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Notes -->
+        <div class="field">
+          <label for="notes">Notes <span style="font-size:0.7rem;opacity:.5;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <textarea id="notes" placeholder="Conditions, beta, partners…"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button type="reset" class="btn btn-ghost">Clear</button>
+          <button type="submit" class="btn btn-primary">Save Ascent</button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <footer>Climbing Log</footer>
+
+</div>
+</body>
+</html>

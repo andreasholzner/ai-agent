@@ -1,0 +1,15 @@
+/* Climbing Log — design tokens (v1 palette) */
+:root {
+  --bg:           #0f1117;   /* page background */
+  --surface:      #181c26;   /* card / panel surface */
+  --border:       #252b3b;   /* default border */
+  --border-focus: #2f6fe8;   /* focused input border */
+  --blue:         #2f6fe8;   /* primary accent */
+  --blue-dim:     #1a3e8a;   /* low-intensity blue (chip backgrounds etc.) */
+  --blue-hover:   #4480f5;   /* hover / brightened blue */
+  --text:         #b8ccf0;   /* body text — blue-tinted off-white */
+  --text-heading: #e8ecf4;   /* heading text — near-neutral white */
+  --text-muted:   #6b7799;   /* secondary / placeholder text */
+  --input-bg:     #13172080; /* input background (semi-transparent) */
+  --radius:       4px;
+}
